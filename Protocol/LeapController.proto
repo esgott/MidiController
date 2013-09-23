@@ -1,0 +1,8 @@
+message FingersPosition {
+	message Finger {
+		required int32 fingerPosition = 1; // percentage, [0, 100]
+		optional bool tapHappened = 2;
+	}
+
+	repeated Finger fingers = 1;
+}
