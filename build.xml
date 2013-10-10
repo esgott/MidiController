@@ -2,6 +2,8 @@
 <project name="LeapController" basedir=".">
 	<property name="proto.src_dir" location="Protocol" />
 	<property name="proto.java_out_dir" location="JavaProtocol" />
+	<property name="test.xml" value="unitTest.xml"/>
+	<property name="test.dir" value="LeapControllerTest"/>
 
 	<target name="clean" description="Delete all generated files">
 		<delete includeEmptyDirs="true">
@@ -10,6 +12,8 @@
 			</fileset>
 		</delete>
 	</target>
+
+	<target name="all" description="Do everything" depends="generate_proto" />
 
 	<target name="generate_proto" description="Generate protocol files for LeapController">
 		<mkdir dir="${proto.java_out_dir}" />
