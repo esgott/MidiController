@@ -1,3 +1,5 @@
+package hu.midicontroller.protocol;
+
 message FingersPosition {
 	message Finger {
 		required int32 fingerPosition = 1; // percentage, [0, 100]

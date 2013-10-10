@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="LeapController" basedir=".">
+	<property name="proto.src_dir" location="Protocol" />
+	<property name="proto.java_out_dir" location="JavaProtocol" />
+
+	<target name="clean" description="Delete all generated files">
+		<delete includeEmptyDirs="true">
+			<fileset dir="${proto.java_out_dir}">
+				<include name="*/**" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="generate_proto" description="Generate protocol files for LeapController">
+		<mkdir dir="${proto.java_out_dir}" />
+		<apply executable="protoc">
+			<arg value="--java_out=${proto.java_out_dir}" />
+			<arg value="--proto_path=${proto.src_dir}" />
+			<srcfile />
+			<fileset dir="${proto.src_dir}" includes="*.proto" />
+		</apply>
+	</target>
+
+</project>
