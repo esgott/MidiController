@@ -2,5 +2,6 @@
 .project
 .settings
 .externalToolBuilders
+log.txt
 bin
 JavaProtocol

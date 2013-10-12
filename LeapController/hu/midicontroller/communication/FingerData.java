@@ -16,4 +16,22 @@ public class FingerData {
 	public boolean tapHappened(int index) {
 		return taps[index];
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("[ ");
+		for (int position : positions) {
+			stringBuilder.append(position);
+			stringBuilder.append(' ');
+		}
+		stringBuilder.append("] [ ");
+		for (boolean tap : taps) {
+			stringBuilder.append(tap);
+			stringBuilder.append(' ');
+		}
+		stringBuilder.append(']');
+		return stringBuilder.toString();
+	}
+
 }

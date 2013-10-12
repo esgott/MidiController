@@ -8,12 +8,16 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class TcpServer implements Runnable {
 
-	private LinkedBlockingQueue<FingerData> queue;
-	private ServerSocket serverSocket;
+	private final LinkedBlockingQueue<FingerData> queue;
+	private final ServerSocket serverSocket;
 	private Socket socket;
+	private final static Logger logger = LogManager.getLogManager().getLogger(
+			TcpServer.class.getName());
 
 	public TcpServer(LinkedBlockingQueue<FingerData> queue,
 			ServerSocket serverSocket) {
@@ -27,12 +31,12 @@ public class TcpServer implements Runnable {
 			InetSocketAddress address = new InetSocketAddress(35678);
 			serverSocket.bind(address);
 			while (true) {
+				logger.info("Server started");
 				socket = serverSocket.accept();
 				handleConnection();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.info("Disconnected: " + e.getMessage());
 		}
 	}
 
@@ -42,11 +46,11 @@ public class TcpServer implements Runnable {
 				FingerData fingerData = queue.take();
 				FingersPosition message = createMessage(fingerData);
 				OutputStream outputStrem = socket.getOutputStream();
+				logger.finest("Sending message: " + message);
 				message.writeTo(outputStrem);
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warning("Queue waiting interrupted: " + e.getMessage());
 		}
 	}
 
@@ -61,12 +65,16 @@ public class TcpServer implements Runnable {
 	}
 
 	public void sendData(FingerData data) {
+		logger.finer("New fingerData to queue: " + data);
 		try {
 			queue.put(data);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warning("Queue waiting interrupted: " + e.getMessage());
 		}
+	}
+
+	public void disconnect() throws IOException, InterruptedException {
+		serverSocket.close();
 	}
 
 }

@@ -54,7 +54,6 @@ public class TcpServerTest {
 		verify(mockQueue, times(2)).take();
 		verify(mockOutputStream, atLeastOnce()).write(any(byte[].class),
 				anyInt(), anyInt());
-		;
 	}
 
 	private FingerData createFingerData() {
@@ -67,5 +66,4 @@ public class TcpServerTest {
 		FingerData fingerData = new FingerData(positions, taps);
 		return fingerData;
 	}
-
 }
