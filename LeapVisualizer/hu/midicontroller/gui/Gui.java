@@ -1,6 +1,6 @@
 package hu.midicontroller.gui;
 
-import hu.midicontroller.Constants;
+import hu.midicontroller.Config;
 
 import java.awt.Container;
 
@@ -10,10 +10,10 @@ import javax.swing.JFrame;
 public class Gui {
 
 	private JFrame frame = new JFrame("Visualizer");
-	private FingerPanel[] fingerPanels = new FingerPanel[Constants.NUM_OF_FINGERS];
+	private FingerPanel[] fingerPanels = new FingerPanel[Config.NUM_OF_FINGERS];
 
 	public Gui() {
-		for (int i = 0; i < Constants.NUM_OF_FINGERS; i++) {
+		for (int i = 0; i < Config.NUM_OF_FINGERS; i++) {
 			fingerPanels[i] = new FingerPanel(i + 1);
 		}
 	}

@@ -1,6 +1,6 @@
 package hu.midicontroller.communication;
 
-import hu.midicontroller.Constants;
+import hu.midicontroller.Config;
 import hu.midicontroller.protocol.LeapController.FingersPosition;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class TcpServer implements Runnable {
 	@Override
 	public void run() {
 		try {
-			InetSocketAddress address = new InetSocketAddress(35678);
+			InetSocketAddress address = new InetSocketAddress(Config.PORT);
 			serverSocket.bind(address);
 			while (true) {
 				logger.info("Server started");
@@ -57,7 +57,7 @@ public class TcpServer implements Runnable {
 
 	private FingersPosition createMessage(FingerData fingerData) {
 		FingersPosition.Builder message = FingersPosition.newBuilder();
-		for (int i = 0; i < Constants.NUM_OF_FINGERS; i++) {
+		for (int i = 0; i < Config.NUM_OF_FINGERS; i++) {
 			FingersPosition.Finger.Builder finger = message.addFingersBuilder();
 			finger.setFingerPosition(fingerData.getPosition(i));
 			finger.setTapHappened(fingerData.tapHappened(i));
