@@ -32,4 +32,8 @@ public class Gui {
 		}
 	}
 
+	public FingerPanel getFingerPanel(int index) {
+		return fingerPanels[index];
+	}
+
 }

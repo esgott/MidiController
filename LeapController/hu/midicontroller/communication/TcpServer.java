@@ -9,7 +9,6 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class TcpServer implements Runnable {
@@ -17,8 +16,9 @@ public class TcpServer implements Runnable {
 	private final LinkedBlockingQueue<FingerData> queue;
 	private final ServerSocket serverSocket;
 	private Socket socket;
-	private final static Logger logger = LogManager.getLogManager().getLogger(
-			TcpServer.class.getName());
+	private boolean stopped = false;
+	private final static Logger logger = Logger.getLogger(TcpServer.class
+			.getName());
 
 	public TcpServer(LinkedBlockingQueue<FingerData> queue,
 			ServerSocket serverSocket) {
@@ -28,17 +28,29 @@ public class TcpServer implements Runnable {
 
 	@Override
 	public void run() {
+		InetSocketAddress address = new InetSocketAddress(Config.PORT);
 		try {
-			InetSocketAddress address = new InetSocketAddress(Config.PORT);
 			serverSocket.bind(address);
-			while (true) {
-				logger.info("Server started");
-				socket = serverSocket.accept();
-				handleConnection();
+			while (!stopped()) {
+				try {
+					logger.info("Server started");
+					socket = serverSocket.accept();
+					handleConnection();
+				} catch (IOException e) {
+					logger.info("Disconnected: " + e.getMessage());
+				}
 			}
-		} catch (IOException e) {
-			logger.info("Disconnected: " + e.getMessage());
+		} catch (IOException e1) {
+			logger.severe("Failed to bind: " + e1.getMessage());
 		}
+	}
+
+	private synchronized boolean stopped() {
+		return stopped;
+	}
+
+	private synchronized void setStopped(boolean state) {
+		stopped = state;
 	}
 
 	private void handleConnection() throws IOException {
@@ -47,8 +59,8 @@ public class TcpServer implements Runnable {
 				FingerData fingerData = queue.take();
 				FingersPosition message = createMessage(fingerData);
 				OutputStream outputStrem = socket.getOutputStream();
-				logger.finest("Sending message: " + message);
-				message.writeTo(outputStrem);
+				logger.fine("Sending message: " + message);
+				message.writeDelimitedTo(outputStrem);
 			}
 		} catch (InterruptedException e) {
 			logger.warning("Queue waiting interrupted: " + e.getMessage());
@@ -75,6 +87,7 @@ public class TcpServer implements Runnable {
 	}
 
 	public void disconnect() throws IOException, InterruptedException {
+		setStopped(true);
 		serverSocket.close();
 	}
 

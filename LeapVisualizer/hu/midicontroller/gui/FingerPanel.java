@@ -16,10 +16,17 @@ public class FingerPanel extends JPanel {
 
 	public FingerPanel(int fingerNum) {
 		label.setText(String.format("%02d:", fingerNum));
+		hitButton.setEnabled(false);
 		this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		this.add(label);
 		this.add(progressBar);
 		this.add(hitButton);
+	}
+
+	public void setNewData(int position, boolean tap) {
+		progressBar.setValue(position);
+		hitButton.setEnabled(tap);
+		System.out.println("setted " + position + " " + tap);
 	}
 
 }

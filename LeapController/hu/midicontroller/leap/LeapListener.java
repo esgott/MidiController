@@ -15,8 +15,8 @@ public class LeapListener extends Listener {
 
 	private final TcpServer tcpServer;
 	private final FingerDataProcessor fingerDataProcessor;
-	private final static Logger logger = LogManager.getLogManager().getLogger(
-			LeapListener.class.getName());
+	private final static Logger logger = Logger.getLogger(LeapListener.class
+			.getName());
 
 	public LeapListener(TcpServer server, FingerDataProcessor processor) {
 		tcpServer = server;
