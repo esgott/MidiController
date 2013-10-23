@@ -1,15 +1,13 @@
 package hu.midicontroller.leap;
 
-import java.util.ArrayList;
+import hu.midicontroller.Config;
+import hu.midicontroller.communication.FingerData;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import hu.midicontroller.Config;
-import hu.midicontroller.communication.FingerData;
-
 import com.leapmotion.leap.Finger;
-import com.leapmotion.leap.FingerList;
 import com.leapmotion.leap.Vector;
 
 public class FingerDataProcessor {
@@ -17,12 +15,12 @@ public class FingerDataProcessor {
 	private int[] minPosition = new int[Config.NUM_OF_FINGERS];
 	private int[] maxPosition = new int[Config.NUM_OF_FINGERS];
 
-	public FingerData processData(FingerList fingerList) {
+	public FingerData processData(List<Finger> fingerList) {
 		int fingerId = 0;
 		int[] fingerPositions = new int[Config.NUM_OF_FINGERS];
 		boolean[] taps = new boolean[Config.NUM_OF_FINGERS];
-		List<Finger> fingers = orderFingers(fingerList);
-		for (Finger finger : fingers) {
+		orderFingers(fingerList);
+		for (Finger finger : fingerList) {
 			if (fingerId < Config.NUM_OF_FINGERS) {
 				Vector fingerTipPosition = finger.tipPosition();
 				int fingerPosition = Math.round(fingerTipPosition.getY());
@@ -43,12 +41,8 @@ public class FingerDataProcessor {
 		return new FingerData(fingerPositions, taps);
 	}
 
-	private List<Finger> orderFingers(FingerList originalList) {
-		List<Finger> result = new ArrayList<Finger>(Config.NUM_OF_FINGERS);
-		for (Finger finger : originalList) {
-			result.add(finger);
-		}
-		Collections.sort(result, new Comparator<Finger>() {
+	private void orderFingers(List<Finger> list) {
+		Collections.sort(list, new Comparator<Finger>() {
 			@Override
 			public int compare(Finger finger1, Finger finger2) {
 				Vector position1 = finger1.tipPosition();
@@ -63,7 +57,6 @@ public class FingerDataProcessor {
 				}
 			}
 		});
-		return result;
 	}
 
 	private int percentage(int start, int end, int position) {

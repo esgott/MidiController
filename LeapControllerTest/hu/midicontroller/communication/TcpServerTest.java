@@ -18,6 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public class TcpServerTest {
 
@@ -41,19 +43,32 @@ public class TcpServerTest {
 	@Test
 	public void afterConnectionNewDataHandledThenServerStoppedWithExceptions()
 			throws IOException, InterruptedException {
-		when(mockServerSocket.accept()).thenReturn(mockSocket).thenThrow(
-				new IOException());
-		when(mockQueue.take()).thenReturn(createFingerData()).thenThrow(
-				new InterruptedException());
+		when(mockServerSocket.accept()).thenReturn(mockSocket);
+		firstReturnDataInQueueThenStopServer();
 		when(mockSocket.getOutputStream()).thenReturn(mockOutputStream);
 
 		tcpServer.run();
 
 		verify(mockServerSocket).bind(argThat(new PortMatcher(35678)));
-		verify(mockServerSocket, times(2)).accept();
+		verify(mockServerSocket).accept();
 		verify(mockQueue, times(2)).take();
 		verify(mockOutputStream, atLeastOnce()).write(any(byte[].class),
 				anyInt(), anyInt());
+	}
+
+	private void firstReturnDataInQueueThenStopServer()
+			throws InterruptedException {
+		FingerData dataInQueue = createFingerData();
+		Answer<FingerData> serverStopper = new Answer<FingerData>() {
+			@Override
+			public FingerData answer(InvocationOnMock invocation)
+					throws Throwable {
+				tcpServer.disconnect();
+				throw new IOException();
+			}
+		};
+		when(mockQueue.take()).thenReturn(dataInQueue)
+				.thenAnswer(serverStopper);
 	}
 
 	private FingerData createFingerData() {
