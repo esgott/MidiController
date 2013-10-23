@@ -31,13 +31,14 @@ public class TcpServer implements Runnable {
 		InetSocketAddress address = new InetSocketAddress(Config.PORT);
 		try {
 			serverSocket.bind(address);
+			logger.info("Server started");
 			while (!stopped()) {
 				try {
-					logger.info("Server started");
+					logger.info("Waiting for client to connect");
 					socket = serverSocket.accept();
 					handleConnection();
 				} catch (IOException e) {
-					logger.info("Disconnected: " + e.getMessage());
+					logger.info("Client disconnected: " + e.getMessage());
 				}
 			}
 		} catch (IOException e1) {
@@ -54,6 +55,7 @@ public class TcpServer implements Runnable {
 	}
 
 	private void handleConnection() throws IOException {
+		logger.info("Client connected");
 		try {
 			while (true) {
 				FingerData fingerData = queue.take();
