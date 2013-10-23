@@ -3,42 +3,36 @@ package hu.midicontroller.leap;
 import hu.midicontroller.Config;
 import hu.midicontroller.communication.FingerData;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import com.leapmotion.leap.Finger;
+import com.leapmotion.leap.FingerList;
 import com.leapmotion.leap.Vector;
 
 public class FingerDataProcessor {
 
-	private int[] minPosition = new int[Config.NUM_OF_FINGERS];
-	private int[] maxPosition = new int[Config.NUM_OF_FINGERS];
+	private FingerStorage fingerStorage;
 
-	public FingerData processData(List<Finger> fingerList) {
-		int fingerId = 0;
-		int[] fingerPositions = new int[Config.NUM_OF_FINGERS];
-		boolean[] taps = new boolean[Config.NUM_OF_FINGERS];
+	public FingerDataProcessor(FingerStorage fingerStorage) {
+		this.fingerStorage = fingerStorage;
+	}
+
+	public FingerData processData(FingerList fingers) {
+		List<Finger> fingerList = convertToStandardList(fingers);
 		orderFingers(fingerList);
-		for (Finger finger : fingerList) {
-			if (fingerId < Config.NUM_OF_FINGERS) {
-				Vector fingerTipPosition = finger.tipPosition();
-				int fingerPosition = Math.round(fingerTipPosition.getY());
-				if (minPosition[fingerId] == 0) {
-					minPosition[fingerId] = fingerPosition;
-				} else {
-					minPosition[fingerId] = Math.min(minPosition[fingerId],
-							fingerPosition);
-				}
-				maxPosition[fingerId] = Math.max(maxPosition[fingerId],
-						fingerPosition);
-				taps[fingerId] = fingerPosition == minPosition[fingerId];
-				fingerPositions[fingerId] = percentage(minPosition[fingerId],
-						maxPosition[fingerId], fingerPosition);
-			}
-			fingerId++;
+		fingerStorage.update(fingerList);
+		return fingerStorage.getFingerDataForCommunication();
+	}
+
+	private List<Finger> convertToStandardList(FingerList originalList) {
+		List<Finger> result = new ArrayList<Finger>(Config.NUM_OF_FINGERS);
+		for (int i = 0; i < originalList.count(); i++) {
+			result.add(originalList.get(i));
 		}
-		return new FingerData(fingerPositions, taps);
+		return result;
 	}
 
 	private void orderFingers(List<Finger> list) {
@@ -57,15 +51,6 @@ public class FingerDataProcessor {
 				}
 			}
 		});
-	}
-
-	private int percentage(int start, int end, int position) {
-		float actual = position - start;
-		float max = end - start;
-		if (max == 0) {
-			return 0;
-		}
-		return Math.round((actual / max) * 100);
 	}
 
 }

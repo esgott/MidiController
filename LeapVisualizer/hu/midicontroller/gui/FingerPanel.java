@@ -26,7 +26,6 @@ public class FingerPanel extends JPanel {
 	public void setNewData(int position, boolean tap) {
 		progressBar.setValue(position);
 		hitButton.setEnabled(tap);
-		System.out.println("setted " + position + " " + tap);
 	}
 
 }

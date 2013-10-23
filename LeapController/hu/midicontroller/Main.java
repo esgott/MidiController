@@ -2,11 +2,16 @@ package hu.midicontroller;
 
 import hu.midicontroller.communication.FingerData;
 import hu.midicontroller.communication.TcpServer;
+import hu.midicontroller.leap.ConfigurationException;
 import hu.midicontroller.leap.FingerDataProcessor;
+import hu.midicontroller.leap.FingerHistory;
+import hu.midicontroller.leap.FingerStorage;
 import hu.midicontroller.leap.LeapListener;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -21,7 +26,8 @@ import com.leapmotion.leap.Listener;
 
 public class Main {
 
-	private static final Logger logger = LogManager.getLogManager().getLogger("");
+	private static final Logger logger = LogManager.getLogManager().getLogger(
+			"");
 	private static FileHandler logFile;
 	private static TcpServer tcpServer;
 
@@ -53,14 +59,24 @@ public class Main {
 					new ServerSocket());
 			Thread serverThread = new Thread(tcpServer);
 			serverThread.start();
-			Listener listener = new LeapListener(tcpServer,
-					new FingerDataProcessor());
+			Listener listener = createListener(tcpServer);
 			Controller controller = new Controller();
 			controller.addListener(listener);
 			waitForKeypress();
 		} catch (IOException e) {
 			logger.severe("Failed to create TcpServer: " + e.getMessage());
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
 		}
+	}
+
+	private static Listener createListener(TcpServer tcpServer)
+			throws ConfigurationException {
+		List<FingerHistory> fingerDataList = new ArrayList<FingerHistory>();
+		FingerStorage fingerStorage = new FingerStorage(fingerDataList);
+		FingerDataProcessor fingerDataProcessor = new FingerDataProcessor(
+				fingerStorage);
+		return new LeapListener(tcpServer, fingerDataProcessor);
 	}
 
 	private static void waitForKeypress() {
