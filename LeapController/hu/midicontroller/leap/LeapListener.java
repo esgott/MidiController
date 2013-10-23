@@ -3,7 +3,6 @@ package hu.midicontroller.leap;
 import hu.midicontroller.communication.FingerData;
 import hu.midicontroller.communication.TcpServer;
 
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import com.leapmotion.leap.Controller;
