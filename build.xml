@@ -1,19 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="LeapController" basedir=".">
-	<property name="proto.src_dir" location="Protocol" />
-	<property name="proto.java_out_dir" location="JavaProtocol" />
+<project name="LeapController" basedir="." default="all">
+
+	<property name="proto.src_dir" location="Protocol"/>
+	<property name="proto.java_out_dir" location="JavaProtocol"/>
+	<property name="proto.jar_name" value="protobuf-java-2.5.0.jar"/>
 	<property name="test.xml" value="unitTest.xml"/>
 	<property name="test.dir" value="LeapControllerTest"/>
+	<property name="java.build_dir" value="build"/>
+	<property name="java.lib_dir" value="lib"/>
+	<property name="controller.classes_dir" value="${java.build_dir}/controller-classes"/>
+	<property name="controller.src_dir" value="LeapController"/>
+	<property name="controller.jar_dir" value="${java.build_dir}"/>
+	<property name="controller.jar_name" value="controller.jar"/>
+	<property name="controller.main_class_name" value="hu.midicontroller.Main"/>
+	<property name="leap.sdk_dir" value="/home/esgott/Repos/Leap_Developer_Kit_0.8.0_5300_Linux"/>
+	<property name="leap.sdk_lib_dir" value="${leap.sdk_dir}/LeapSDK/lib"/>
+	<property name="leap.jar_name" value="LeapJava.jar"/>
+
+	<path id="controller.classpath">
+		<pathelement location="${java.lib_dir}/${proto.jar_name}"/>
+		<pathelement location="${leap.sdk_lib_dir}/${leap.jar_name}"/>
+	</path>
 
 	<target name="clean" description="Delete all generated files">
-		<delete includeEmptyDirs="true">
-			<fileset dir="${proto.java_out_dir}">
-				<include name="*/**" />
-			</fileset>
-		</delete>
+		<delete dir="${proto.java_out_dir}"/>
+		<delete dir="${java.build_dir}"/>
 	</target>
 
-	<target name="all" description="Do everything" depends="generate_proto" />
+	<target name="all" description="Compile everything" depends="controller_jar" />
+
+	<target name="compile_controller" depends="generate_proto">
+		<mkdir dir="${controller.classes_dir}"/>
+		<javac includeantruntime="false" srcdir="${proto.java_out_dir}" destdir="${controller.classes_dir}" classpathref="controller.classpath"/>
+		<javac includeantruntime="false" srcdir="${controller.src_dir}" destdir="${controller.classes_dir}" classpathref="controller.classpath"/>
+	</target>
+
+	<target name="controller_jar" description="Create jar from controller classes" depends="compile_controller">
+		<mkdir dir="${controller.jar_dir}"/>
+		<jar destfile="${controller.jar_dir}/${controller.jar_name}" basedir="${controller.classes_dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${controller.main_class_name}"/>
+			</manifest>
+		</jar>
+	</target>
 
 	<target name="generate_proto" description="Generate protocol files for LeapController">
 		<mkdir dir="${proto.java_out_dir}" />
@@ -23,6 +52,40 @@
 			<srcfile />
 			<fileset dir="${proto.src_dir}" includes="*.proto" />
 		</apply>
+	</target>
+
+	<target name="detect_architecture" description="Detects architecture for native libraries">
+		<exec executable="java" resultproperty="arch_output">
+			<arg line="-d64 -version"/>
+		</exec>
+		<condition property="java_vm_is_64_bit">
+			<equals arg1="${arch_output}" arg2="0"/>
+		</condition>
+		<condition property="java_vm_is_32_bit">
+			<not>
+				<isset property="java_vm_is_64_bit"/>
+			</not>
+		</condition>
+	</target>
+
+	<target name="select_32bit_libraries" if="java_vm_is_64_bit" depends="detect_architecture">
+		<property name="leap.native_lib_dir" value="${leap.sdk_lib_dir}/x64"/>
+	</target>
+
+	<target name="select_64bit_libraries" if="java_vm_is_32_bit" depends="detect_architecture">
+		<property name="leap.native_lib_dir" value="${leap.sdk_lib_dir}/x86"/>
+	</target>
+
+	<target name="select_architecture" description="Selects the native libraries for the current architecture" depends="select_32bit_libraries,select_64bit_libraries"/>
+
+	<target name="run" depends="controller_jar,select_architecture">
+		<java fork="true" classname="${controller.main_class_name}">
+			<classpath>
+				<path refid="controller.classpath"/>
+				<path location="${controller.jar_dir}/${controller.jar_name}"/>
+			</classpath>
+			<sysproperty key="java.library.path" value="${leap.native_lib_dir}"/>
+		</java>
 	</target>
 
 </project>
