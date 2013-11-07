@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="LeapController" basedir="." default="all">
 
+	<property environment="env"/>
 	<property name="proto.src_dir" location="Protocol"/>
 	<property name="proto.java_out_dir" location="JavaProtocol"/>
 	<property name="proto.jar_name" value="protobuf-java-2.5.0.jar"/>
@@ -13,7 +14,7 @@
 	<property name="controller.jar_dir" value="${java.build_dir}"/>
 	<property name="controller.jar_name" value="controller.jar"/>
 	<property name="controller.main_class_name" value="hu.midicontroller.Main"/>
-	<property name="leap.sdk_dir" value="/home/esgott/Repos/Leap_Developer_Kit_0.8.0_5300_Linux"/>
+	<property name="leap.sdk_dir" value="${env.LEAP_SDK_DIR}"/>
 	<property name="leap.sdk_lib_dir" value="${leap.sdk_dir}/LeapSDK/lib"/>
 	<property name="leap.jar_name" value="LeapJava.jar"/>
 
