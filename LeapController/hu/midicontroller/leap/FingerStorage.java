@@ -121,7 +121,7 @@ public class FingerStorage {
 		for (int i = 0; i < Config.NUM_OF_FINGERS; i++) {
 			FingerHistory actualFinger = fingers.get(i);
 			tipPositions[i] = actualFinger.getPercentageDown();
-			taps[i] = false;
+			taps[i] = actualFinger.tapHappened();
 			actualFinger.clearUpdated();
 		}
 

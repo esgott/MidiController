@@ -2,6 +2,8 @@ package hu.midicontroller.leap;
 
 public class FingerHistory {
 
+	private static final float EROSION_SPEED = 0.2f;
+	private static final float EROSION_TRESHOLD = 20f;
 	private float widthPosition;
 	private float heightPosition;
 	private float maxHeightPosition = Float.NEGATIVE_INFINITY;
@@ -14,9 +16,21 @@ public class FingerHistory {
 
 	public void setHeightPosition(float position) {
 		heightPosition = position;
+		maxMinErosion();
 		maxHeightPosition = Math.max(maxHeightPosition, position);
 		minHeightPosition = Math.min(minHeightPosition, position);
 		updated = true;
+	}
+
+	private void maxMinErosion() {
+		float spaceUntilMax = maxHeightPosition - heightPosition;
+		if (spaceUntilMax > EROSION_TRESHOLD) {
+			maxHeightPosition -= EROSION_SPEED;
+		}
+		float spaceUntilMin = heightPosition - maxHeightPosition;
+		if (spaceUntilMin > EROSION_TRESHOLD) {
+			minHeightPosition += EROSION_SPEED;
+		}
 	}
 
 	public void setWidthPosition(float position) {
@@ -47,6 +61,10 @@ public class FingerHistory {
 
 	public boolean updated() {
 		return updated;
+	}
+
+	public boolean tapHappened() {
+		return updated && getPercentageDown() < 10;
 	}
 
 }
